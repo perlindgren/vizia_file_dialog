@@ -12,6 +12,11 @@ cargo run
 
 The UI is inspired by the `vscode` file selector, with clickable path segments. Initially the current path is selected, and its content displayed as a list of entries (files/folders). Clicking on a folder extends the path. Clicking on a path segment selects the path (from root until the selected path segment). Clicking on a folder in the current dir extends the path from the current dir (potentially replacing path segments). Nothing fancy but seems quite intuitive.
 
+There is a editable text button at the top, currently unused will show the selected file with full path eventually...
+
+- Navigation:
+  - Tab:ing of the path segments. Enter to select segment. 
+
 ## TODO
 
 There are a lot of possibilities:
@@ -20,8 +25,7 @@ There are a lot of possibilities:
 - Filtering:
   - Sorting entries by type, date, etc.
   - Allowing to filter by reg-exp (e.g.)
-- Navigation:
-  - Tab:ing of the path segments. Enter to select segment.
+- Selection:
   - Inc/Dec among current dir entries. Enter to select file/folder.
 
 - API and wrapping
