@@ -2,12 +2,11 @@ use std::env;
 
 use std::ffi::OsString;
 use std::fmt::{self, Display};
-use std::fs::{self, DirEntry, FileType};
+use std::fs::{self, FileType};
 use std::io;
-use std::path;
 use std::path::{Path, PathBuf};
 use vizia::prelude::*;
-use vizia::state::{Data, LensExt};
+use vizia::state::Data;
 
 const THEME: &str = r#"
 
@@ -20,18 +19,18 @@ const THEME: &str = r#"
     }
 "#;
 
-#[derive(Clone, Debug, Lens, PartialEq, Eq)]
-pub struct DirInfo {
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct DirEntryInfo {
     file_type: FileType,
     file_name: OsString,
 }
-impl Display for DirInfo {
+impl Display for DirEntryInfo {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.file_name.clone().into_string().unwrap())
     }
 }
 
-impl Data for DirInfo {
+impl Data for DirEntryInfo {
     fn same(&self, other: &Self) -> bool {
         self == other
     }
@@ -41,9 +40,9 @@ impl Data for DirInfo {
 pub struct AppData {
     pub path_list: Vec<String>, // path segments (may be longer than path_len)
     pub path_len: usize,        // length of current path_list
-    pub entries: Vec<DirInfo>,  // files in current dir
+    pub entries: Vec<DirEntryInfo>, // files in current dir
     // pub selected: usize,
-    pub file: DirInfo,
+    pub file: DirEntryInfo,
 }
 
 impl AppData {
@@ -81,13 +80,8 @@ impl Model for AppData {
 
         event.map(|app_event, _| match app_event {
             AppEvent::Select(index) => {
-                // self.selected = *index;
                 let entry = self.entries.get(*index).unwrap();
-                println!("sel:{:?}", self.entries.get(*index).unwrap());
                 if entry.file_type.is_dir() {
-                    println!("--- dir --- {:?}", entry.file_name);
-                    println!("--- path index --- {:?}", self.path_len);
-                    // keep
                     self.path_list.truncate(self.path_len);
                     self.path_list
                         .push(entry.file_name.to_string_lossy().to_string());
@@ -120,11 +114,11 @@ impl Model for FileData {
     }
 }
 
-fn folders(dir: &Path) -> Result<Vec<DirInfo>, io::Error> {
+fn folders(dir: &Path) -> Result<Vec<DirEntryInfo>, io::Error> {
     fs::read_dir(dir)?
         .into_iter()
-        .map(|x| {
-            x.map(|entry| DirInfo {
+        .map(|result_entry| {
+            result_entry.map(|entry| DirEntryInfo {
                 file_type: entry.file_type().unwrap(), // fix
                 file_name: entry.file_name(),
             })
@@ -165,7 +159,7 @@ fn main() {
 
         VStack::new(cx, |cx| {
             Textbox::new(cx, FileData::text)
-                .on_edit(|cx, text| {
+                .on_edit(|_cx, text| {
                     println!("{:?}", text);
                 })
                 .width(Pixels(200.0))
