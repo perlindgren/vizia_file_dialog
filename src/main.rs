@@ -7,6 +7,7 @@ use std::io;
 use std::path::{Path, PathBuf};
 use vizia::prelude::*;
 use vizia::state::Data;
+// use vizia::vg::Color;
 
 const THEME: &str = r#"
 
@@ -15,7 +16,15 @@ const THEME: &str = r#"
     }
 
     label:hover {
-        background-color: blue;
+        background-color: grey;
+    }
+
+    label:checked {
+        background-color: grey;
+    }
+
+    button:checked {
+        background-color: grey;
     }
 "#;
 
@@ -41,7 +50,7 @@ pub struct AppData {
     pub path_list: Vec<String>, // path segments (may be longer than path_len)
     pub path_len: usize,        // length of current path_list
     pub entries: Vec<DirEntryInfo>, // files in current dir
-    // pub selected: usize,
+    pub selected: usize,        // selected entry in current dir
     pub file: DirEntryInfo,
 }
 
@@ -86,6 +95,9 @@ impl Model for AppData {
                     self.path_list
                         .push(entry.file_name.to_string_lossy().to_string());
                     self.update_path(self.path_list.len());
+                    self.selected = 0;
+                } else {
+                    self.selected = *index;
                 }
             }
             AppEvent::PathSelect(index) => {
@@ -150,7 +162,7 @@ fn main() {
             path_len: current_dir_vec.len(),
             path_list: current_dir_vec,
             entries: path_strings,
-            // selected: 0,
+            selected: 0,
             file: first_sel,
         }
         .build(cx);
@@ -173,18 +185,32 @@ fn main() {
                         cx.emit(AppEvent::PathSelect(index))
                     },
                     |cx| Label::new(cx, item),
-                );
+                ) // Set the checked state based on whether this item is selected
+                .checked(AppData::path_len.map(move |p_len| *p_len == index + 1));
             })
             .layout_type(LayoutType::Row)
             .col_between(Pixels(5.0));
 
             ScrollView::new(cx, 0.0, 0.0, false, true, |cx| {
                 List::new(cx, AppData::entries, |cx, index, item| {
+                    let info = item.get_val(cx);
                     Label::new(cx, item)
                         .on_press(move |cx| cx.emit(AppEvent::Select(index)))
-                        .text_wrap(false);
+                        .text_wrap(false)
+                        .color(if info.file_type.is_dir() {
+                            Color::rgb(100, 100, 100) // TODO use Style
+                        } else {
+                            Color::black() // TODO use default from Style
+                        })
+                        // Set the checked state based on whether this item is selected
+                        .checked(AppData::selected.map(move |selected| *selected == index));
                 })
                 .on_double_click(|_, _| println!("double click"));
+                // TODO increment/decrement to navigate directory entries
+                // .on_increment(move |cx| cx.emit(AppEvent::IncrementSelection))
+                // .on_decrement(move |cx| cx.emit(AppEvent::DecrementSelection));
+                // .on_increment(move |cx| println!("increment"))
+                // .on_decrement(move |cx| println!("decrement"));
             });
         });
     })

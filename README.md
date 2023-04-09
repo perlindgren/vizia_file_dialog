@@ -15,11 +15,7 @@ The UI is inspired by the `vscode` file selector, with clickable path segments. 
 ## TODO
 
 There are a lot of possibilities:
-- Path info:
-  - Highlighting the current set path somehow.
 - File info:
-  - Highlighting the current selected file.
-  - Distinguishing file type by color.
   - Showing file size.
 - Filtering:
   - Sorting entries by type, date, etc.
