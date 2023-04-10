@@ -1,8 +1,6 @@
-use std::env;
-
 use bytesize::ByteSize;
-use chrono::offset::Local;
-use chrono::DateTime;
+use chrono::{offset::Local, DateTime};
+use std::env;
 use std::ffi::OsString;
 use std::fmt::{self, Display};
 use std::fs::{self, FileType, Metadata};
@@ -31,7 +29,7 @@ impl Data for DirEntryInfo {
     }
 }
 
-#[derive(Debug, Eq, PartialEq, Clone)]
+#[derive(Debug, Eq, PartialEq, Clone, Copy)]
 pub enum Sorting {
     NameUp,
     NameDown,
@@ -68,7 +66,29 @@ impl AppData {
         let current_dir: PathBuf = new_path_list.iter().collect();
         println!("current_dir {:?}", current_dir);
         self.entries = folders(&current_dir).unwrap();
+        self.sort();
         println!("entries \n{:?}", self.entries);
+    }
+
+    fn sort(&mut self) {
+        self.entries.sort_by(|a, b| match self.sorting {
+            Sorting::NameDown => a.file_name.cmp(&b.file_name),
+            Sorting::NameUp => b.file_name.cmp(&a.file_name),
+            Sorting::SizeUp => a.metadata.len().cmp(&b.metadata.len()),
+            Sorting::SizeDown => b.metadata.len().cmp(&a.metadata.len()),
+
+            // not sure if comparisons on SystemTime works
+            Sorting::DateUp => a
+                .metadata
+                .modified()
+                .unwrap()
+                .cmp(&b.metadata.modified().unwrap()),
+            Sorting::DateDown => b
+                .metadata
+                .modified()
+                .unwrap()
+                .cmp(&a.metadata.modified().unwrap()),
+        });
     }
 }
 
@@ -115,18 +135,21 @@ impl Model for AppData {
                     Sorting::NameUp => Sorting::NameDown,
                     _ => Sorting::NameUp,
                 };
+                self.sort();
             }
             AppEvent::SortSize => {
                 self.sorting = match self.sorting {
                     Sorting::SizeUp => Sorting::SizeDown,
                     _ => Sorting::SizeUp,
                 };
+                self.sort();
             }
             AppEvent::SortDate => {
                 self.sorting = match self.sorting {
                     Sorting::DateUp => Sorting::DateDown,
                     _ => Sorting::DateUp,
                 };
+                self.sort();
             }
         })
     }
@@ -188,15 +211,17 @@ fn main() {
         }
         .build(cx);
 
-        AppData {
+        let mut app_data = AppData {
             path_len: current_dir_vec.len(),
             path_list: current_dir_vec,
             entries: path_strings,
             selected: 0,
             file: first_sel,
             sorting: Sorting::NameDown,
-        }
-        .build(cx);
+        };
+
+        app_data.sort();
+        app_data.build(cx);
 
         cx.add_stylesheet("resources/file_dialog.css").unwrap();
 
@@ -295,9 +320,8 @@ fn main() {
                         },
                     )
                     .width(Pixels(100.0));
-
-                    // Label::new(cx, "Modified").width(Pixels(100.0));
                 })
+                .col_between(Pixels(3.0))
                 .size(Auto);
 
                 ScrollView::new(cx, 0.0, 0.0, false, true, |cx| {
@@ -341,6 +365,7 @@ fn main() {
                                 .width(Pixels(100.0))
                                 .hoverable(false);
                         })
+                        .col_between(Pixels(3.0))
                         .class("entry")
                         .checkable(true)
                         .checked(AppData::selected.map(move |selected| *selected == index))
