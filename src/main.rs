@@ -9,6 +9,7 @@ use std::fs::{self, FileType, Metadata};
 use std::io;
 use std::path::{Path, PathBuf};
 use std::time::SystemTime;
+use vizia::fonts::icons_names::{DOWN, MINUS, UP};
 use vizia::prelude::*;
 use vizia::state::Data;
 
@@ -30,6 +31,22 @@ impl Data for DirEntryInfo {
     }
 }
 
+#[derive(Debug, Eq, PartialEq, Clone)]
+pub enum Sorting {
+    NameUp,
+    NameDown,
+    SizeUp,
+    SizeDown,
+    DateUp,
+    DateDown,
+}
+
+impl Data for Sorting {
+    fn same(&self, other: &Self) -> bool {
+        self == other
+    }
+}
+
 #[derive(Lens)]
 pub struct AppData {
     pub path_list: Vec<String>, // path segments (may be longer than path_len)
@@ -37,6 +54,7 @@ pub struct AppData {
     pub entries: Vec<DirEntryInfo>, // files in current dir
     pub selected: usize,        // selected entry in current dir
     pub file: DirEntryInfo,
+    pub sorting: Sorting,
 }
 
 impl AppData {
@@ -58,6 +76,9 @@ impl AppData {
 pub enum AppEvent {
     Select(usize),
     PathSelect(usize),
+    SortName,
+    SortSize,
+    SortDate,
 }
 
 impl Model for AppData {
@@ -88,6 +109,24 @@ impl Model for AppData {
             }
             AppEvent::PathSelect(index) => {
                 self.update_path(*index + 1);
+            }
+            AppEvent::SortName => {
+                self.sorting = match self.sorting {
+                    Sorting::NameUp => Sorting::NameDown,
+                    _ => Sorting::NameUp,
+                };
+            }
+            AppEvent::SortSize => {
+                self.sorting = match self.sorting {
+                    Sorting::SizeUp => Sorting::SizeDown,
+                    _ => Sorting::SizeUp,
+                };
+            }
+            AppEvent::SortDate => {
+                self.sorting = match self.sorting {
+                    Sorting::DateUp => Sorting::DateDown,
+                    _ => Sorting::DateUp,
+                };
             }
         })
     }
@@ -155,6 +194,7 @@ fn main() {
             entries: path_strings,
             selected: 0,
             file: first_sel,
+            sorting: Sorting::NameDown,
         }
         .build(cx);
 
@@ -185,9 +225,78 @@ fn main() {
             VStack::new(cx, |cx| {
                 // Header
                 HStack::new(cx, |cx| {
-                    Label::new(cx, "Name").width(Pixels(400.0));
-                    Label::new(cx, "Size").width(Pixels(100.0));
-                    Label::new(cx, "Modified").width(Pixels(100.0));
+                    Button::new(
+                        cx,
+                        |cx| {
+                            cx.emit(AppEvent::SortName);
+                        },
+                        |cx| {
+                            HStack::new(cx, |cx| {
+                                Label::new(cx, "Name").size(Auto);
+                                Label::new(
+                                    cx,
+                                    AppData::sorting.map(move |sorting| match sorting {
+                                        Sorting::NameUp => UP,
+                                        Sorting::NameDown => DOWN,
+                                        _ => MINUS,
+                                    }),
+                                )
+                                .class("icon")
+                                .right(Pixels(0.0));
+                            })
+                            .col_between(Stretch(1.0))
+                        },
+                    )
+                    .width(Pixels(400.0));
+                    Button::new(
+                        cx,
+                        |cx| {
+                            cx.emit(AppEvent::SortSize);
+                        },
+                        |cx| {
+                            HStack::new(cx, |cx| {
+                                Label::new(cx, "Size").size(Auto);
+                                Label::new(
+                                    cx,
+                                    AppData::sorting.map(move |sorting| match sorting {
+                                        Sorting::SizeUp => UP,
+                                        Sorting::SizeDown => DOWN,
+                                        _ => MINUS,
+                                    }),
+                                )
+                                .class("icon")
+                                .right(Pixels(0.0));
+                            })
+                            .col_between(Stretch(1.0))
+                        },
+                    )
+                    .width(Pixels(100.0));
+
+                    Button::new(
+                        cx,
+                        |cx| {
+                            cx.emit(AppEvent::SortDate);
+                        },
+                        |cx| {
+                            HStack::new(cx, |cx| {
+                                Label::new(cx, "Modified").size(Auto);
+                                Label::new(
+                                    cx,
+                                    AppData::sorting.map(move |sorting| match sorting {
+                                        Sorting::DateUp => UP,
+                                        Sorting::DateDown => DOWN,
+                                        _ => MINUS,
+                                    }),
+                                )
+                                .class("icon")
+                                .right(Pixels(0.0));
+                            })
+                            .col_between(Stretch(1.0))
+                        },
+                    )
+                    .width(Pixels(100.0));
+
+                    // Label::new(cx, "Modified").width(Pixels(100.0));
                 })
                 .size(Auto);
 
