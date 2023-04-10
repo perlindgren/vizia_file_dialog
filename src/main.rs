@@ -1,13 +1,16 @@
 use std::env;
 
+use bytesize::ByteSize;
+use chrono::offset::Local;
+use chrono::DateTime;
 use std::ffi::OsString;
 use std::fmt::{self, Display};
 use std::fs::{self, FileType, Metadata};
 use std::io;
 use std::path::{Path, PathBuf};
+use std::time::SystemTime;
 use vizia::prelude::*;
 use vizia::state::Data;
-// use vizia::vg::Color;
 
 const THEME: &str = r#"
 
@@ -201,21 +204,18 @@ fn main() {
                 // Header
                 HStack::new(cx, |cx| {
                     Label::new(cx, "Name").width(Pixels(400.0));
-                    Label::new(cx, "Size");
+                    Label::new(cx, "Size").width(Pixels(100.0));
+                    Label::new(cx, "Modified").width(Pixels(100.0));
                 });
 
                 ScrollView::new(cx, 0.0, 0.0, false, true, |cx| {
                     List::new(cx, AppData::entries, |cx, index, item| {
                         let info = item.get_val(cx);
+
                         HStack::new(cx, |cx| {
-                            Label::new(cx, item)
+                            let l1 = Label::new(cx, item)
                                 .on_press(move |cx| cx.emit(AppEvent::Select(index)))
                                 .text_wrap(false)
-                                .color(if info.file_type.is_dir() {
-                                    Color::rgb(100, 100, 100) // TODO use Style
-                                } else {
-                                    Color::black() // TODO use default from Style
-                                })
                                 .font_weight(if info.file_type.is_dir() {
                                     Weight::BOLD
                                 } else {
@@ -225,7 +225,31 @@ fn main() {
                                 // .size(Auto)
                                 // Set the checked state based on whether this item is selected
                                 .checked(AppData::selected.map(move |selected| *selected == index));
-                            Label::new(cx, info.metadata.len());
+
+                            let mut size = "".to_string();
+                            if info.file_type.is_dir() {
+                                l1.color(
+                                    Color::rgb(100, 100, 100), // TODO use Style
+                                )
+                                .font_weight(Weight::BOLD);
+                            } else {
+                                size = format!("{}", ByteSize::b(info.metadata.len()));
+                            }
+
+                            let l2 = Label::new(cx, &size).width(Pixels(100.0));
+
+                            let system_date: DateTime<Local> = SystemTime::now().into();
+                            let modified_date: DateTime<Local> =
+                                info.metadata.modified().unwrap().into();
+                            let modified = if system_date.date_naive() == modified_date.date_naive()
+                            {
+                                format!("{}", modified_date.format("%T"))
+                            } else {
+                                format!("{}", modified_date.format("%d/%m/%Y"))
+                            };
+
+                            let l3 = Label::new(cx, &modified).width(Pixels(100.0));
+
                             //.right(Pixels(0.0));
                         });
                         // .child_left(Stretch(0.0))
