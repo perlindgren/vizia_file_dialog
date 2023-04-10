@@ -29,6 +29,19 @@ const THEME: &str = r#"
     button:checked {
         background-color: grey;
     }
+
+    .entry {
+        background-color: blue;
+    }
+    
+    .entry:hover {
+        background-color: grey;
+    }
+
+    .entry:checked {
+        background-color: grey;
+    }
+
 "#;
 
 #[derive(Clone, Debug)]
@@ -93,6 +106,7 @@ impl Model for AppData {
 
         event.map(|app_event, _| match app_event {
             AppEvent::Select(index) => {
+                println!("select {}", index);
                 let entry = self.entries.get(*index).unwrap();
                 if entry.file_type.is_dir() {
                     self.path_list.truncate(self.path_len);
@@ -206,7 +220,7 @@ fn main() {
                     Label::new(cx, "Name").width(Pixels(400.0));
                     Label::new(cx, "Size").width(Pixels(100.0));
                     Label::new(cx, "Modified").width(Pixels(100.0));
-                });
+                }).size(Auto);
 
                 ScrollView::new(cx, 0.0, 0.0, false, true, |cx| {
                     List::new(cx, AppData::entries, |cx, index, item| {
@@ -222,9 +236,7 @@ fn main() {
                                     Weight::THIN
                                 })
                                 .width(Pixels(400.0))
-                                // .size(Auto)
-                                // Set the checked state based on whether this item is selected
-                                .checked(AppData::selected.map(move |selected| *selected == index));
+                                .hoverable(false);
 
                             let mut size = "".to_string();
                             if info.file_type.is_dir() {
@@ -236,7 +248,7 @@ fn main() {
                                 size = format!("{}", ByteSize::b(info.metadata.len()));
                             }
 
-                            let l2 = Label::new(cx, &size).width(Pixels(100.0));
+                            Label::new(cx, &size).width(Pixels(100.0)).hoverable(false);
 
                             let system_date: DateTime<Local> = SystemTime::now().into();
                             let modified_date: DateTime<Local> =
@@ -247,18 +259,15 @@ fn main() {
                             } else {
                                 format!("{}", modified_date.format("%d/%m/%Y"))
                             };
-
-                            let l3 = Label::new(cx, &modified).width(Pixels(100.0));
-
-                            //.right(Pixels(0.0));
-                        });
-                        // .child_left(Stretch(0.0))
-                        // .child_right(Stretch(1.0))
-                        // .size(Auto);
-                        //.width(Pixels(400.0));
+                            Label::new(cx, &modified).width(Pixels(100.0)).hoverable(false);
+                        })
+                        .class("entry")
+                        // Set the checked state based on whether this item is selected       
+                        .checked(AppData::selected.map(move |selected| *selected == index))
+                        .on_press(move |cx| cx.emit(AppEvent::Select(index)));
                     })
                     .row_between(Pixels(2.0))
-                    .on_double_click(|_, _| println!("double click"));
+                    .on_double_click(|_, _| println!("double click"));       
 
                     // TODO increment/decrement to navigate directory entries
                     // .on_increment(move |cx| cx.emit(AppEvent::IncrementSelection))
@@ -269,7 +278,9 @@ fn main() {
                 //.border_color(Color::black())
                 //.border_radius(Pixels(2.0));
             })
-            .row_between(Pixels(5.0));
+            // .size(Auto)
+            // .row_between(Pixels(5.0));
+            ;
         });
     })
     .run();
