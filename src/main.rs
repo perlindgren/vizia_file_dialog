@@ -11,7 +11,7 @@ use vizia::fonts::icons_names::{DOWN, MINUS, UP};
 use vizia::prelude::*;
 use vizia::state::Data;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Lens)]
 pub struct DirEntryInfo {
     file_type: FileType,
     metadata: Metadata,
@@ -325,59 +325,66 @@ fn main() {
                 .size(Auto);
 
                 ScrollView::new(cx, 0.0, 0.0, false, true, |cx| {
-                    List::new(cx, AppData::entries, |cx, index, item| {
-                        let info = item.get_val(cx);
+                    VStack::new(cx, |cx| {
+                        Binding::new(cx, AppData::entries, |cx, list_lens| {
+                            for (index, item) in list_lens.get(cx).iter().enumerate() {
+                                HStack::new(cx, |cx| {
+                                    // let info = item.get_val(cx);
+                                    let l1 = Label::new(cx, item.file_name.to_str().unwrap())
+                                        //             //         .on_press(move |cx| cx.emit(AppEvent::Select(index)))
+                                        .text_wrap(false)
+                                        //             //         .font_weight(if info.file_type.is_dir() {
+                                        //             //             Weight::BOLD
+                                        //             //         } else {
+                                        //             //             Weight::THIN
+                                        //             //         })
+                                        .width(Pixels(400.0))
+                                        .hoverable(false);
 
-                        HStack::new(cx, |cx| {
-                            let l1 = Label::new(cx, item)
-                                .on_press(move |cx| cx.emit(AppEvent::Select(index)))
-                                .text_wrap(false)
-                                .font_weight(if info.file_type.is_dir() {
-                                    Weight::BOLD
-                                } else {
-                                    Weight::THIN
+                                    //                 //     // let mut size = "".to_string();
+                                    //                 //     // if info.file_type.is_dir() {
+                                    //                 //     //     l1.color(
+                                    //                 //     //         Color::rgb(100, 100, 100), // TODO use Style
+                                    //                 //     //     )
+                                    //                 //     //     .font_weight(Weight::BOLD);
+                                    //                 //     // } else {
+                                    //                 //     //     size = format!("{}", ByteSize::b(info.metadata.len()));
+                                    //                 //     // }
+
+                                    //                 //     Label::new(cx, item.then(DirEntryInfo::metadata).map(|metadata| ""))
+                                    //                 //         .width(Pixels(100.0))
+                                    //                 //         .hoverable(false);
+                                    //                 //     //.text(&size);
+
+                                    //                 //     let system_date: DateTime<Local> = SystemTime::now().into();
+                                    //                 //     let modified_date: DateTime<Local> =
+                                    //                 //         info.metadata.modified().unwrap().into();
+                                    //                 //     let modified = if system_date.date_naive() == modified_date.date_naive()
+                                    //                 //     {
+                                    //                 //         format!("{}", modified_date.format("%T"))
+                                    //                 //     } else {
+                                    //                 //         format!("{}", modified_date.format("%d/%m/%Y"))
+                                    //                 //     };
+                                    //                 //     Label::new(cx, &modified)
+                                    //                 //         .width(Pixels(100.0))
+                                    //                 //         .hoverable(false);
                                 })
-                                .width(Pixels(400.0))
-                                .hoverable(false);
-
-                            let mut size = "".to_string();
-                            if info.file_type.is_dir() {
-                                l1.color(
-                                    Color::rgb(100, 100, 100), // TODO use Style
-                                )
-                                .font_weight(Weight::BOLD);
-                            } else {
-                                size = format!("{}", ByteSize::b(info.metadata.len()));
+                                .col_between(Pixels(3.0))
+                                .class("entry")
+                                .checkable(true)
+                                .checked(AppData::selected.map(move |selected| *selected == index))
+                                .on_press(move |cx| cx.emit(AppEvent::Select(index)));
                             }
-
-                            Label::new(cx, &size).width(Pixels(100.0)).hoverable(false);
-
-                            let system_date: DateTime<Local> = SystemTime::now().into();
-                            let modified_date: DateTime<Local> =
-                                info.metadata.modified().unwrap().into();
-                            let modified = if system_date.date_naive() == modified_date.date_naive()
-                            {
-                                format!("{}", modified_date.format("%T"))
-                            } else {
-                                format!("{}", modified_date.format("%d/%m/%Y"))
-                            };
-                            Label::new(cx, &modified)
-                                .width(Pixels(100.0))
-                                .hoverable(false);
-                        })
-                        .col_between(Pixels(3.0))
-                        .class("entry")
-                        .checkable(true)
-                        .checked(AppData::selected.map(move |selected| *selected == index))
-                        .on_press(move |cx| cx.emit(AppEvent::Select(index)));
+                        });
                     })
                     .row_between(Pixels(2.0));
-                    //.on_double_click(|_, _| println!("double click"));
-                    // TODO increment/decrement to navigate directory entries
-                    // .on_increment(move |cx| cx.emit(AppEvent::IncrementSelection))
-                    // .on_decrement(move |cx| cx.emit(AppEvent::DecrementSelection));
-                    // .on_increment(move |cx| println!("increment"))
-                    // .on_decrement(move |cx| println!("decrement"));
+
+                    //     //.on_double_click(|_, _| println!("double click"));
+                    //     // TODO increment/decrement to navigate directory entries
+                    //     // .on_increment(move |cx| cx.emit(AppEvent::IncrementSelection))
+                    //     // .on_decrement(move |cx| cx.emit(AppEvent::DecrementSelection));
+                    //     // .on_increment(move |cx| println!("increment"))
+                    //     // .on_decrement(move |cx| println!("decrement"));
                 });
                 //.border_color(Color::black())
                 //.border_radius(Pixels(2.0));
