@@ -326,6 +326,7 @@ fn main() {
                     .width(Percentage(20.0));
                 })
                 .col_between(Pixels(3.0))
+                .right(Pixels(100.0))
                 .width(Stretch(1.0))
                 .height(Auto);
 
@@ -352,6 +353,7 @@ fn main() {
 
                                     // Size
                                     Label::new(cx, &size)
+                                        .text_wrap(false)
                                         .width(Percentage(10.0))
                                         .hoverable(false);
 
@@ -366,13 +368,12 @@ fn main() {
                                             format!("{}", modified_date.format("%d/%m/%Y"))
                                         };
                                     Label::new(cx, &modified)
+                                        .text_wrap(false)
                                         .width(Percentage(20.0))
                                         .hoverable(false);
-                                }) // let info = item.get_val(cx);// let info = item.get_val(cx);
-                                // .size(Auto)
+                                })
                                 .col_between(Pixels(3.0))
                                 .class("entry")
-                                //.checkable(true)
                                 .checked(AppData::selected.map(move |selected| *selected == index))
                                 .on_press(move |cx| cx.emit(AppEvent::Select(index)));
                             }
