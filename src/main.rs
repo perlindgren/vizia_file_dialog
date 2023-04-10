@@ -2,7 +2,7 @@ use std::env;
 
 use std::ffi::OsString;
 use std::fmt::{self, Display};
-use std::fs::{self, FileType};
+use std::fs::{self, FileType, Metadata};
 use std::io;
 use std::path::{Path, PathBuf};
 use vizia::prelude::*;
@@ -28,9 +28,10 @@ const THEME: &str = r#"
     }
 "#;
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug)]
 pub struct DirEntryInfo {
     file_type: FileType,
+    metadata: Metadata,
     file_name: OsString,
 }
 impl Display for DirEntryInfo {
@@ -41,7 +42,7 @@ impl Display for DirEntryInfo {
 
 impl Data for DirEntryInfo {
     fn same(&self, other: &Self) -> bool {
-        self == other
+        self.file_name == other.file_name
     }
 }
 
@@ -132,6 +133,7 @@ fn folders(dir: &Path) -> Result<Vec<DirEntryInfo>, io::Error> {
         .map(|result_entry| {
             result_entry.map(|entry| DirEntryInfo {
                 file_type: entry.file_type().unwrap(), // fix
+                metadata: entry.metadata().unwrap(),
                 file_name: entry.file_name(),
             })
         })
@@ -150,9 +152,13 @@ fn main() {
 
     let first_sel = path_strings.get(0).unwrap().clone();
 
-    println!("path_strings {:?}", path_strings);
-
     Application::new(|cx| {
+        Keymap::from(vec![(
+            KeyChord::new(Modifiers::empty(), Code::Escape),
+            KeymapEntry::new(Action::OnEsc, |_| println!("Escape")),
+        )])
+        .build(cx);
+
         FileData {
             text: String::new(),
         }
@@ -191,28 +197,62 @@ fn main() {
             .layout_type(LayoutType::Row)
             .col_between(Pixels(5.0));
 
-            ScrollView::new(cx, 0.0, 0.0, false, true, |cx| {
-                List::new(cx, AppData::entries, |cx, index, item| {
-                    let info = item.get_val(cx);
-                    Label::new(cx, item)
-                        .on_press(move |cx| cx.emit(AppEvent::Select(index)))
-                        .text_wrap(false)
-                        .color(if info.file_type.is_dir() {
-                            Color::rgb(100, 100, 100) // TODO use Style
-                        } else {
-                            Color::black() // TODO use default from Style
-                        })
-                        // Set the checked state based on whether this item is selected
-                        .checked(AppData::selected.map(move |selected| *selected == index));
-                })
-                .on_double_click(|_, _| println!("double click"));
-                // TODO increment/decrement to navigate directory entries
-                // .on_increment(move |cx| cx.emit(AppEvent::IncrementSelection))
-                // .on_decrement(move |cx| cx.emit(AppEvent::DecrementSelection));
-                // .on_increment(move |cx| println!("increment"))
-                // .on_decrement(move |cx| println!("decrement"));
-            });
+            VStack::new(cx, |cx| {
+                // Header
+                HStack::new(cx, |cx| {
+                    Label::new(cx, "Name").width(Pixels(400.0));
+                    Label::new(cx, "Size");
+                });
+
+                ScrollView::new(cx, 0.0, 0.0, false, true, |cx| {
+                    List::new(cx, AppData::entries, |cx, index, item| {
+                        let info = item.get_val(cx);
+                        HStack::new(cx, |cx| {
+                            Label::new(cx, item)
+                                .on_press(move |cx| cx.emit(AppEvent::Select(index)))
+                                .text_wrap(false)
+                                .color(if info.file_type.is_dir() {
+                                    Color::rgb(100, 100, 100) // TODO use Style
+                                } else {
+                                    Color::black() // TODO use default from Style
+                                })
+                                .font_weight(if info.file_type.is_dir() {
+                                    Weight::BOLD
+                                } else {
+                                    Weight::THIN
+                                })
+                                .width(Pixels(400.0))
+                                // .size(Auto)
+                                // Set the checked state based on whether this item is selected
+                                .checked(AppData::selected.map(move |selected| *selected == index));
+                            Label::new(cx, info.metadata.len());
+                            //.right(Pixels(0.0));
+                        });
+                        // .child_left(Stretch(0.0))
+                        // .child_right(Stretch(1.0))
+                        // .size(Auto);
+                        //.width(Pixels(400.0));
+                    })
+                    .row_between(Pixels(2.0))
+                    .on_double_click(|_, _| println!("double click"));
+
+                    // TODO increment/decrement to navigate directory entries
+                    // .on_increment(move |cx| cx.emit(AppEvent::IncrementSelection))
+                    // .on_decrement(move |cx| cx.emit(AppEvent::DecrementSelection));
+                    // .on_increment(move |cx| println!("increment"))
+                    // .on_decrement(move |cx| println!("decrement"));
+                });
+                //.border_color(Color::black())
+                //.border_radius(Pixels(2.0));
+            })
+            .row_between(Pixels(5.0));
         });
     })
     .run();
+}
+
+// The actions that are associated with the key chords.
+#[derive(Debug, PartialEq, Copy, Clone)]
+enum Action {
+    OnEsc,
 }
