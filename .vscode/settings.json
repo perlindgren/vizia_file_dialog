@@ -1,4 +1,11 @@
 {
-  "cSpell.ignoreWords": ["Textbox", "datetime", "hoverable", "vizia"],
+  "cSpell.ignoreWords": [
+    "Textbox",
+    "chrono",
+    "datetime",
+    "hoverable",
+    "trik",
+    "vizia"
+  ],
   "cSpell.words": ["bytesize"]
 }

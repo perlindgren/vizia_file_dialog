@@ -1,0 +1,23 @@
+label:hover {
+    background-color: grey;
+}
+
+label:checked {
+    background-color: grey;
+}
+
+button:checked {
+    background-color: grey;
+}
+
+.entry {
+    background-color: #e0e0e0;
+}
+
+.entry:hover {
+    background-color: #a0a0a0
+}
+
+.entry:checked {
+    background-color: #909090;
+}

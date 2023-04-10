@@ -12,38 +12,6 @@ use std::time::SystemTime;
 use vizia::prelude::*;
 use vizia::state::Data;
 
-const THEME: &str = r#"
-
-    label {
-        background-color: white;
-    }
-
-    label:hover {
-        background-color: grey;
-    }
-
-    label:checked {
-        background-color: grey;
-    }
-
-    button:checked {
-        background-color: grey;
-    }
-
-    .entry {
-        background-color: blue;
-    }
-    
-    .entry:hover {
-        background-color: grey;
-    }
-
-    .entry:checked {
-        background-color: grey;
-    }
-
-"#;
-
 #[derive(Clone, Debug)]
 pub struct DirEntryInfo {
     file_type: FileType,
@@ -190,7 +158,7 @@ fn main() {
         }
         .build(cx);
 
-        cx.add_theme(THEME);
+        cx.add_stylesheet("resources/file_dialog.css").unwrap();
 
         VStack::new(cx, |cx| {
             Textbox::new(cx, FileData::text)
@@ -220,7 +188,8 @@ fn main() {
                     Label::new(cx, "Name").width(Pixels(400.0));
                     Label::new(cx, "Size").width(Pixels(100.0));
                     Label::new(cx, "Modified").width(Pixels(100.0));
-                }).size(Auto);
+                })
+                .size(Auto);
 
                 ScrollView::new(cx, 0.0, 0.0, false, true, |cx| {
                     List::new(cx, AppData::entries, |cx, index, item| {
@@ -259,16 +228,17 @@ fn main() {
                             } else {
                                 format!("{}", modified_date.format("%d/%m/%Y"))
                             };
-                            Label::new(cx, &modified).width(Pixels(100.0)).hoverable(false);
+                            Label::new(cx, &modified)
+                                .width(Pixels(100.0))
+                                .hoverable(false);
                         })
                         .class("entry")
-                        // Set the checked state based on whether this item is selected       
+                        .checkable(true)
                         .checked(AppData::selected.map(move |selected| *selected == index))
                         .on_press(move |cx| cx.emit(AppEvent::Select(index)));
                     })
-                    .row_between(Pixels(2.0))
-                    .on_double_click(|_, _| println!("double click"));       
-
+                    .row_between(Pixels(2.0));
+                    //.on_double_click(|_, _| println!("double click"));
                     // TODO increment/decrement to navigate directory entries
                     // .on_increment(move |cx| cx.emit(AppEvent::IncrementSelection))
                     // .on_decrement(move |cx| cx.emit(AppEvent::DecrementSelection));
@@ -277,10 +247,9 @@ fn main() {
                 });
                 //.border_color(Color::black())
                 //.border_radius(Pixels(2.0));
-            })
+            });
             // .size(Auto)
             // .row_between(Pixels(5.0));
-            ;
         });
     })
     .run();

@@ -2,6 +2,8 @@
 
 A simple file dialog for the Vizia framework. At this point consider it a POC, it has no stable API (in fact it does not really have an API at all).
 
+Big thanks to @geom3trik and all the great people of Vizia community.
+
 ## Usage
 
 ```shell
@@ -20,8 +22,7 @@ There is a editable text button at the top, currently unused will show the selec
 ## TODO
 
 There are a lot of possibilities:
-- File info:
-  - Showing file size.
+
 - Filtering:
   - Sorting entries by type, date, etc.
   - Allowing to filter by reg-exp (e.g.)
