@@ -248,10 +248,14 @@ fn main() {
             .col_between(Pixels(5.0));
 
             VStack::new(cx, |cx| {
+                let min_width_name = 200.0;
+                let min_width_size = 50.0;
+                let min_width_modified = 60.0;
+
                 // Header
                 HStack::new(cx, |cx| {
                     // Name
-                    Button::new(
+                    let b = Button::new(
                         cx,
                         |cx| {
                             cx.emit(AppEvent::SortName);
@@ -270,10 +274,11 @@ fn main() {
                                 .class("icon")
                                 .right(Pixels(0.0));
                             })
+                            .min_width(Pixels(min_width_name))
                             .col_between(Stretch(1.0))
                         },
                     )
-                    .width(Percentage(70.0));
+                    .width(Stretch(0.7));
 
                     // Size
                     Button::new(
@@ -295,10 +300,11 @@ fn main() {
                                 .class("icon")
                                 .right(Pixels(0.0));
                             })
+                            .min_width(Pixels(min_width_size))
                             .col_between(Stretch(1.0))
                         },
                     )
-                    .width(Percentage(10.0));
+                    .width(Stretch(0.1));
 
                     // Modified
                     Button::new(
@@ -317,22 +323,23 @@ fn main() {
                                         _ => MINUS,
                                     }),
                                 )
+                                .min_width(Pixels(min_width_modified))
                                 .class("icon")
                                 .right(Pixels(0.0));
                             })
                             .col_between(Stretch(1.0))
                         },
                     )
-                    .width(Percentage(20.0));
+                    .width(Stretch(0.2));
                 })
                 .col_between(Pixels(3.0))
                 .right(Pixels(20.0))
                 .width(Stretch(1.0))
                 .height(Auto);
 
-                ScrollView::new(cx, 0.0, 0.0, false, true, |cx| {
+                ScrollView::new(cx, 0.0, 0.0, false, true, move |cx| {
                     VStack::new(cx, |cx| {
-                        Binding::new(cx, AppData::entries, |cx, list_lens| {
+                        Binding::new(cx, AppData::entries, move |cx, list_lens| {
                             for (index, item) in list_lens.get(cx).iter().enumerate() {
                                 HStack::new(cx, |cx| {
                                     // Name
@@ -345,8 +352,9 @@ fn main() {
                                             item.file_name.to_str().unwrap()
                                         },
                                     )
+                                    .min_width(Pixels(min_width_name))
                                     .text_wrap(false)
-                                    .width(Percentage(70.0))
+                                    .width(Stretch(0.7))
                                     .hoverable(false);
 
                                     let mut size = "".to_string();
@@ -363,8 +371,9 @@ fn main() {
 
                                     // Size
                                     Label::new(cx, &size)
+                                        .min_width(Pixels(min_width_size))
                                         .text_wrap(false)
-                                        .width(Percentage(10.0))
+                                        .width(Stretch(0.1))
                                         .hoverable(false);
 
                                     // Modified
@@ -378,11 +387,14 @@ fn main() {
                                             format!("{}", modified_date.format("%d/%m/%Y"))
                                         };
                                     Label::new(cx, &modified)
+                                        .right(Pixels(0.0))
+                                        .min_width(Pixels(min_width_modified))
                                         .text_wrap(false)
-                                        .width(Percentage(20.0))
+                                        .width(Stretch(0.2))
                                         .hoverable(false);
                                 })
                                 .col_between(Pixels(3.0))
+                                .right(Pixels(20.0))
                                 .class("entry")
                                 .checked(AppData::selected.map(move |selected| *selected == index))
                                 .on_press(move |cx| cx.emit(AppEvent::Select(index)));
