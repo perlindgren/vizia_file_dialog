@@ -18,20 +18,29 @@ There is a editable text button at the top, currently unused will show the selec
 
 - Navigation:
   - Tab:ing of the path segments. Enter to select segment.
+- Sorting:
+  - Sorting entries by name, type, modification date.
 
 ## TODO
 
+Known issues:
+
+- Handling of symlinks. As of now symlinks are indicate by a trailing `@` (and a different color). Symlinks cannot be followed as of now. (Handling of symlinks is a bit OS dependent, no clear picture what to do/what we want here).
+
+- If window is shrunk to much the path segments might go out of view. gtk3 file dialog puts `<` `>` buttons for scrolling the list, not sure if we want that or a scroll bar or something else.
+
 There are a lot of possibilities:
 
+- There is a editable text button at the top, currently unused. We can have it showing the currently selected file, and editing this manually could set the path segments and selected file if a match is found. Not sure if we want this, or some other behavior.
+
 - Filtering:
-  - Sorting entries by type, date, etc.
-  - Allowing to filter by reg-exp (e.g.)
+  - Allowing to filter name by reg-exp (e.g.)
 - Selection:
-
   - Inc/Dec among current dir entries. Enter to select file/folder.
-
+- File Type:
+  - Currently we don't show file type. Its not part of the metadata directly, so question is where to get this info from. Perhaps the system environment but that will be system dependent. One can see on the permissions if the file is executable and show that somehow.
 - API and wrapping
-  - Widget as a modal dialog perhaps?
+  - Widget as either a modal dialog and/or embedded widget? Not sure what we want here.
 
 ## License
 
