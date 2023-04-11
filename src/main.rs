@@ -274,10 +274,10 @@ fn main() {
                                 .class("icon")
                                 .right(Pixels(0.0));
                             })
-                            .min_width(Pixels(min_width_name))
                             .col_between(Stretch(1.0))
                         },
                     )
+                    .min_width(Pixels(min_width_name))
                     .width(Stretch(0.7));
 
                     // Size
@@ -300,10 +300,10 @@ fn main() {
                                 .class("icon")
                                 .right(Pixels(0.0));
                             })
-                            .min_width(Pixels(min_width_size))
                             .col_between(Stretch(1.0))
                         },
                     )
+                    .min_width(Pixels(min_width_size))
                     .width(Stretch(0.1));
 
                     // Modified
@@ -323,13 +323,13 @@ fn main() {
                                         _ => MINUS,
                                     }),
                                 )
-                                .min_width(Pixels(min_width_modified))
                                 .class("icon")
                                 .right(Pixels(0.0));
                             })
                             .col_between(Stretch(1.0))
                         },
                     )
+                    .min_width(Pixels(min_width_modified))
                     .width(Stretch(0.2));
                 })
                 .col_between(Pixels(3.0))
