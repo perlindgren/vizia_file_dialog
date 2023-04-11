@@ -29,6 +29,10 @@ Known issues:
 
 - If window is shrunk to much the path segments might go out of view. gtk3 file dialog puts `<` `>` buttons for scrolling the list, not sure if we want that or a scroll bar or something else.
 
+- Attempting to traverse into a folder for which you don't have permissions to results in a panic.
+
+- Sorting by size is based on the actual size of the file including folders and symlinks. Not sure what we want to do here.
+
 There are a lot of possibilities:
 
 - There is a editable text button at the top, currently unused. We can have it showing the currently selected file, and editing this manually could set the path segments and selected file if a match is found. Not sure if we want this, or some other behavior.
