@@ -17,7 +17,7 @@ The UI is inspired by the `vscode` file selector, with clickable path segments. 
 There is a editable text button at the top, currently unused will show the selected file with full path eventually...
 
 - Navigation:
-  - Tab:ing of the path segments. Enter to select segment. 
+  - Tab:ing of the path segments. Enter to select segment.
 
 ## TODO
 
@@ -27,12 +27,12 @@ There are a lot of possibilities:
   - Sorting entries by type, date, etc.
   - Allowing to filter by reg-exp (e.g.)
 - Selection:
+
   - Inc/Dec among current dir entries. Enter to select file/folder.
 
 - API and wrapping
   - Widget as a modal dialog perhaps?
 
-
 ## License
 
-As free as can be...
+Following the [MIT](https://github.com/vizia/vizia/blob/main/LICENSE) license of Vizia.
