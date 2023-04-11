@@ -255,7 +255,7 @@ fn main() {
                 // Header
                 HStack::new(cx, |cx| {
                     // Name
-                    let b = Button::new(
+                    Button::new(
                         cx,
                         |cx| {
                             cx.emit(AppEvent::SortName);
