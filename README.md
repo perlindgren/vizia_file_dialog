@@ -12,7 +12,7 @@ cargo run
 
 ## Design
 
-The UI is inspired by the `vscode` file selector, with clickable path segments. Initially the current path is selected, and its content displayed as a list of entries (files/folders). Clicking on a folder extends the path. Clicking on a path segment selects the path (from root until the selected path segment). Clicking on a folder in the current dir extends the path from the current dir (potentially replacing path segments). Nothing fancy but seems quite intuitive.
+The UI is inspired by the `vscode` file selector (electron/gtk?), with clickable path segments. Initially the current path is selected, and its content displayed as a list of entries (files/folders). Clicking on a folder extends the path. Clicking on a path segment selects the path (from root until the selected path segment). Clicking on a folder in the current dir extends the path from the current dir (potentially replacing path segments). Nothing fancy but seems quite intuitive.
 
 There is a editable text button at the top, currently unused will show the selected file with full path eventually...
 
@@ -25,7 +25,7 @@ There is a editable text button at the top, currently unused will show the selec
 
 Known issues:
 
-- Handling of symlinks. As of now symlinks are indicate by a trailing `@` (and a different color). Symlinks cannot be followed as of now. (Handling of symlinks is a bit OS dependent, no clear picture what to do/what we want here).
+- Handling of symlinks. As of now symlinks are indicated by a trailing `@` (and a different color). Symlinks cannot be followed as of now. (Handling of symlinks is a bit OS dependent, no clear picture what to do/what we want here).
 
 - If window is shrunk to much the path segments might go out of view. gtk3 file dialog puts `<` `>` buttons for scrolling the list, not sure if we want that or a scroll bar or something else.
 
