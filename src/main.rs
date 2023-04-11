@@ -326,7 +326,7 @@ fn main() {
                     .width(Percentage(20.0));
                 })
                 .col_between(Pixels(3.0))
-                .right(Pixels(100.0))
+                .right(Pixels(20.0))
                 .width(Stretch(1.0))
                 .height(Auto);
 
@@ -336,19 +336,29 @@ fn main() {
                             for (index, item) in list_lens.get(cx).iter().enumerate() {
                                 HStack::new(cx, |cx| {
                                     // Name
-                                    let l1 = Label::new(cx, item.file_name.to_str().unwrap())
-                                        .text_wrap(false)
-                                        .width(Percentage(70.0))
-                                        .hoverable(false);
+                                    let symlink = format!("{}@", item.file_name.to_str().unwrap());
+                                    let l1 = Label::new(
+                                        cx,
+                                        if item.file_type.is_symlink() {
+                                            &symlink
+                                        } else {
+                                            item.file_name.to_str().unwrap()
+                                        },
+                                    )
+                                    .text_wrap(false)
+                                    .width(Percentage(70.0))
+                                    .hoverable(false);
 
                                     let mut size = "".to_string();
-                                    if item.file_type.is_dir() {
-                                        l1.color(
-                                            Color::rgb(100, 100, 100), // TODO use Style
-                                        )
-                                        .font_weight(Weight::BOLD);
-                                    } else {
+                                    if item.file_type.is_file() {
                                         size = format!("{}", ByteSize::b(item.metadata.len()));
+                                    } else {
+                                        l1.color(if item.file_type.is_symlink() {
+                                            Color::rgb(80, 80, 80) // TODO use Style
+                                        } else {
+                                            Color::rgb(100, 100, 100) // TODO use Style
+                                        })
+                                        .font_weight(Weight::BOLD);
                                     }
 
                                     // Size
@@ -380,12 +390,11 @@ fn main() {
                         });
                     })
                     .row_between(Pixels(2.0));
-
                     //     // TODO increment/decrement to navigate directory entries
                     //     // .on_increment(move |cx| cx.emit(AppEvent::IncrementSelection))
                     //     // .on_decrement(move |cx| cx.emit(AppEvent::DecrementSelection));
-                    //     // .on_increment(move |cx| println!("increment"))
-                    //     // .on_decrement(move |cx| println!("decrement"));
+                    //.on_increment(move |cx| println!("increment"))
+                    //.on_decrement(move |cx| println!("decrement"));
                 });
                 //.border_color(Color::black())
                 //.border_radius(Pixels(2.0));
